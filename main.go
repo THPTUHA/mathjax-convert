@@ -45,7 +45,7 @@ func handleUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer file.Close()
-
+	fmt.Println("upload")
 	var buffer bytes.Buffer
 	writer := multipart.NewWriter(&buffer)
 	fileWriter, err := writer.CreateFormFile("file", "image.jpg")

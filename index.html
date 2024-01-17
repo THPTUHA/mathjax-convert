@@ -21,7 +21,11 @@
         <button type="button" onclick="uploadImage()">Upload</button>
     </form>
     <div id="result"></div>
-
+    <div id="previewmj"></div>
+    <script type="text/javascript" async src="https://polyfill.io/v3/polyfill.min.js?features=es6">
+    </script>
+    <script type="text/javascript" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js">
+    </script>
     <script>
         document.getElementById('dropArea').addEventListener('paste', function (event) {
             var items = (event.clipboardData || event.originalEvent.clipboardData).items;
@@ -101,8 +105,15 @@
             xhr.onload = function () {
                 if (xhr.status === 200) {
                     var resultDiv = document.getElementById('result');
+                    var previewDiv = document.getElementById('previewmj');
                     var latexCode = xhr.responseText;
-                    resultDiv.innerHTML = '<p>Result: ' + `$$${latexCode}$$` + '</p>';
+                    previewDiv.innerHTML = ''
+                    resultDiv.innerHTML = `$$${latexCode}$$`
+                    MathJax.tex2chtmlPromise(latexCode).then(function (node) {
+                        previewDiv.appendChild(node);
+                        MathJax.startup.document.clear();
+                        MathJax.startup.document.updateDocument();
+                    });
                 } else {
                     alert('Error: ' + xhr.statusText);
                 }
