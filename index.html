@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mathjax Convert</title>
+</head>
+
+<body>
+    <h1>Mathjax Convert</h1>
+    <form id="uploadForm" enctype="multipart/form-data">
+        <input type="file" name="file" id="fileInput" accept="image/*" style="display: none">
+        <button type="button" onclick="triggerFileInput()">Select Image</button>
+        <div id="dropArea" style="border: 2px dashed #ccc; padding: 20px; margin-top: 10px;">
+            <p>Ctrl+C an image, Ctrl+V here to upload, or select an image</p>
+            <img id="preview" style="max-width: 100%; max-height: 200px; margin-top: 10px; display: none;">
+            <button type="button" onclick="removeImage()">Remove</button>
+        </div>
+        <button type="button" onclick="uploadImage()">Upload</button>
+    </form>
+    <div id="result"></div>
+
+    <script>
+        document.getElementById('dropArea').addEventListener('paste', function (event) {
+            var items = (event.clipboardData || event.originalEvent.clipboardData).items;
+
+            for (var index in items) {
+                var item = items[index];
+                if (item.kind === 'file') {
+                    var blob = item.getAsFile();
+                    var file = new File([blob], 'pasted_image.png', { type: blob.type });
+
+                    // Tạo một DataTransfer giả mạo và thêm file vào đó
+                    var dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(file);
+
+                    // Gán DataTransfer cho thuộc tính files của input
+                    var fileInput = document.getElementById('fileInput');
+                    fileInput.files = dataTransfer.files;
+
+                    displayImagePreview(file);
+                    break;
+                }
+            }
+        });
+
+
+
+        function triggerFileInput() {
+            document.getElementById('fileInput').click();
+        }
+
+        function handleFileSelect(event) {
+            event.preventDefault();
+            var fileInput = document.getElementById('fileInput');
+            var files = event.dataTransfer ? event.dataTransfer.files : event.target.files;
+
+            if (files.length > 0) {
+                fileInput.files = files;
+                displayImagePreview(files[0]);
+            }
+        }
+
+        function displayImagePreview(file) {
+            var preview = document.getElementById('preview');
+            preview.style.display = 'block';
+
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                preview.src = e.target.result;
+            };
+
+            reader.readAsDataURL(file);
+        }
+
+        function removeImage() {
+            var preview = document.getElementById('preview');
+            preview.style.display = 'none';
+
+            var fileInput = document.getElementById('fileInput');
+            fileInput.value = ''; // Clear the selected file
+        }
+
+        function uploadImage() {
+            var fileInput = document.getElementById('fileInput');
+            var file = fileInput.files[0];
+
+            if (!file) {
+                alert('Please select or paste an image before uploading.');
+                return;
+            }
+
+            var formData = new FormData();
+            formData.append('file', file);
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', 'http://mathjax.badaosuotdoi.com/upload', true);
+
+            xhr.onload = function () {
+                if (xhr.status === 200) {
+                    var resultDiv = document.getElementById('result');
+                    var latexCode = xhr.responseText;
+                    resultDiv.innerHTML = '<p>Result: ' + `$$${latexCode}$$` + '</p>';
+                } else {
+                    alert('Error: ' + xhr.statusText);
+                }
+            };
+
+            xhr.onerror = function () {
+                alert('Request failed');
+            };
+
+            xhr.send(formData);
+        }
+
+        var dropArea = document.getElementById('dropArea');
+        dropArea.addEventListener('dragover', function (event) {
+            event.preventDefault();
+            dropArea.style.border = '2px dashed #aaa';
+        });
+
+        dropArea.addEventListener('dragleave', function () {
+            dropArea.style.border = '2px dashed #ccc';
+        });
+
+        dropArea.addEventListener('drop', handleFileSelect);
+
+        fileInput.addEventListener('change', function (event) {
+            handleFileSelect(event);
+        });
+    </script>
+</body>
+
+</html>

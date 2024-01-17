@@ -1,0 +1,2 @@
+docker pull lukasblecher/pix2tex:api
+docker run --rm -p 8502:8502 lukasblecher/pix2tex:api
