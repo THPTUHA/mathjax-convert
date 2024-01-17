@@ -17,8 +17,8 @@ func main() {
 	mux.HandleFunc("/", serveHTML)
 	mux.HandleFunc("/upload", handleUpload)
 	handler := cors.Default().Handler(mux)
-	fmt.Println("Server running on port 8080")
-	http.ListenAndServe(":8080", handler)
+	fmt.Println("Server running on port 8082")
+	http.ListenAndServe(":8082", handler)
 }
 
 func serveHTML(w http.ResponseWriter, r *http.Request) {
