@@ -7,15 +7,30 @@ import (
 	"io"
 	"mime/multipart"
 	"net/http"
+	"text/template"
 
 	"github.com/rs/cors"
 )
 
 func main() {
 	mux := http.NewServeMux()
+	mux.HandleFunc("/", serveHTML)
 	mux.HandleFunc("/upload", handleUpload)
 	handler := cors.Default().Handler(mux)
+	fmt.Println("Server running on port 8080")
 	http.ListenAndServe(":8080", handler)
+}
+
+func serveHTML(w http.ResponseWriter, r *http.Request) {
+	// Đọc tệp HTML
+	html, err := template.ParseFiles("./index.html")
+	if err != nil {
+		http.Error(w, fmt.Sprintf("Error reading HTML file: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	// Phục vụ tệp HTML
+	html.Execute(w, nil)
 }
 
 func handleUpload(w http.ResponseWriter, r *http.Request) {
